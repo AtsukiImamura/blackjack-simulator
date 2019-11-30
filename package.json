@@ -1,0 +1,35 @@
+{
+  "name": "Blackjack-Simulator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack",
+    "watch": "webpack --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AtsukiImamura/MunSe-ilsHomePageMaker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AtsukiImamura/MunSe-ilsHomePageMaker/issues"
+  },
+  "homepage": "https://github.com/AtsukiImamura/MunSe-ilsHomePageMaker#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "@babel/core": "^7.4.3",
+    "@babel/preset-env": "^7.4.3",
+    "@types/node": "^12.12.14",
+    "@types/uuid": "^3.4.6",
+    "babel-loader": "^8.0.5",
+    "ts-loader": "^6.0.4",
+    "tslint": "^5.20.1",
+    "typescript": "^3.7.2",
+    "uuid": "^3.3.3",
+    "webpack": "^4.39.2",
+    "webpack-cli": "^3.3.6"
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "ter-indent": [true, 4]
+  }
+}
