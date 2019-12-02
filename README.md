@@ -1,3 +1,3 @@
 # blackjack-simulator
 
-![デモ](https://imgur.com/XwVOudg)
+<img src="https://imgur.com/XwVOudg" alt="デモ" />
