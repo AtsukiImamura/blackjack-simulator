@@ -4,3 +4,6 @@
 # build files
 test.js
 index.js
+
+dist/**/*
+!index.html

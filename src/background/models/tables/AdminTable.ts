@@ -61,6 +61,12 @@ export default class AdminTable extends Table {
     }
   }
 
+  public play(num: number) {
+    for (let i = 0; i < num; i++) {
+      this.playOnce();
+    }
+  }
+
   /**
    * Play game once, and then calcurate gained or losed coin of each players including dealer.
    */
