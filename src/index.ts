@@ -2,15 +2,15 @@
 import { Vue } from "vue-property-decorator";
 import App from "./view/App.vue";
 
-import Router from "vue-router";
+// import Router from "vue-router";
 
-Vue.use(Router);
+// Vue.use(Router);
 
-const router = new Router({
-  routes: [{ path: "/", component: App }]
-});
+// const router = new Router({
+//   routes: [{ path: "/", component: App }]
+// });
 
 new Vue({
-  components: { App },
-  router: router
+  components: { App }
+  // router: router
 }).$mount("#app");

@@ -1,15 +1,28 @@
 <template>
   <div class="dr-selector">
-    <input class="selected-item" type="button" :value="selectedValue" @click="showOptions()" />
+    <input
+      class="selected-item"
+      type="button"
+      :value="selectedValue"
+      @click="showOptions()"
+    />
     <div class="options-bg" v-show="isOptionOpen" @click="closeOptions()"></div>
     <ul class="options" v-show="isOptionOpen">
       <li
         class="option"
-        :class="{'selected': key === selectedId}"
-        v-for="([key, value], index) in this.options.entries()"
+        :class="{
+          selected: option.id === selectedId,
+          disabled: option.disabled
+        }"
+        v-for="(option, index) in this.options"
         :key="index"
-        @click="select(key); closeOptions();"
-      >{{ value }}</li>
+        @click="
+          select(option.id);
+          closeOptions();
+        "
+      >
+        {{ option.name }}
+      </li>
     </ul>
   </div>
 </template>
@@ -37,8 +50,9 @@ export default class DropDownSelector extends Mixins(Selector) {
 
 <style lang="scss" scoped>
 .dr-selector {
-  min-width: 200px;
+  width: 240px;
   position: relative;
+  max-width: 100%;
   .selected-item {
     width: 100%;
     border: 1px solid #cccccc;
@@ -54,15 +68,23 @@ export default class DropDownSelector extends Mixins(Selector) {
       width: 10px;
       height: 10px;
     }
+    &:hover {
+      transition-duration: 0.25s;
+      background-color: #f8f8f8;
+    }
+    &:focus {
+      outline: none;
+    }
   }
   .options {
     width: 100%;
     margin: 0;
     padding: 0;
     position: absolute;
-    top: 33px;
+    top: 32px;
     left: 1px;
     background-color: #ffffff;
+    z-index: 3;
     // box-shadow: 1px 1px 1.5px 1.5px rgba(0, 0, 0, 0.25);
     .option {
       list-style: none;
@@ -80,6 +102,13 @@ export default class DropDownSelector extends Mixins(Selector) {
         color: #ffffff;
         &:hover {
           background-color: #808080;
+        }
+      }
+      &.disabled {
+        color: #c0c0c0;
+        &:hover {
+          background-color: #ffffff;
+          cursor: not-allowed;
         }
       }
     }

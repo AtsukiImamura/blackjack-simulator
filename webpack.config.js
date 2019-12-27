@@ -25,7 +25,15 @@ module.exports = {
       },
       {
         test: /\.vue/,
-        loader: "vue-loader"
+        use: [
+          {
+            loader: "vue-loader",
+            options: {
+              url: false,
+              sourceMap: true
+            }
+          }
+        ]
       },
       {
         test: /\.js/,

@@ -1,10 +1,12 @@
 <template>
-  <div class="action-summary">
+  <div class="action-summary" v-if="summary.action != 'STAY'">
     <div class="action">
-      <span :class="summary.action.toLowerCase()">{{ summary.action }}</span>
+      <span
+        :class="summary.action.toLowerCase()"
+      >{{ summary.action.slice(0,1).toUpperCase() + summary.action.slice(1).toLowerCase() }}</span>
     </div>
-    <div class="card" v-if="summary.card">
-      <span>{{ summary.card.number }}</span>
+    <div class="card">
+      <TrumpCard v-if="summary.card" :card="summary.card"></TrumpCard>
     </div>
   </div>
 </template>
@@ -12,9 +14,10 @@
 <script lang="ts">
 import { Component, Vue, Prop } from "vue-property-decorator";
 import { ActionSummary } from "../../background/models/tables/GameSummary";
+import TrumpCard from "./TrumpCard.vue";
 
 @Component({
-  components: {}
+  components: { TrumpCard }
 })
 export default class ActionItem extends Vue {
   @Prop()
@@ -29,14 +32,15 @@ export default class ActionItem extends Vue {
   display: flex;
   margin: 3px 0;
   font-size: 14px;
+  min-width: 110px;
   .action {
-    width: 30%;
+    width: 60%;
     margin: 0 2% 0 8%;
     span {
       display: block;
       padding: 3px 5px;
       border-radius: 3px;
-      width: 60px;
+      width: 50px;
       text-align: center;
       border: 1px solid #ffffff;
     }
@@ -46,7 +50,7 @@ export default class ActionItem extends Vue {
       color: #ffffff;
     }
     .stay {
-      //   background-color: #808080;
+      background-color: #ffffff;
       border-color: #808080;
       color: #808080;
     }
@@ -56,16 +60,19 @@ export default class ActionItem extends Vue {
       color: #ffffff;
     }
     .split {
+      background-color: #ffffff;
       border-color: #0080ff;
       color: #0080ff;
     }
     .surrender {
+      background-color: #ffffff;
       border-color: #b3009b;
       color: #b3009b;
     }
   }
   .card {
-    width: 50%;
+    width: calc(45px + 5%);
+    margin-left: 5%;
   }
 }
 </style>

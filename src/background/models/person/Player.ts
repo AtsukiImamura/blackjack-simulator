@@ -2,8 +2,7 @@ import BettingPolicy from "../../options/policies/betting/BettingPolicy";
 import Person from "./Person";
 import Table from "../tables/Table";
 import CardSet from "../cards/CardSet";
-import SplitConstraintBase from "../../options/rules/split/SplitConstraintBase";
-import BasicSplitConstraint from "../../options/rules/split/BasicSplitConstraint";
+import SplitConstraint from "../../options/rules/split/SplitConstraint";
 import { Action } from "../../constants/GameConstants";
 import BasicStrategy, { CardCombination } from "../../constants/BasicStrategy";
 import Card from "../cards/Card";
@@ -16,7 +15,7 @@ export default class Player extends Person {
 
   private _bettingPolicy: BettingPolicy;
 
-  private _splitConstraint: typeof SplitConstraintBase;
+  private _splitConstraint: typeof SplitConstraint;
 
   private _currentAction: Action = Action.NONE;
 
@@ -27,7 +26,7 @@ export default class Player extends Person {
   constructor(
     policyType: typeof BettingPolicy = ImamBettingPolicy,
     // policyType: typeof BettingPolicy = BettingPolicy,
-    splitConstraint: typeof SplitConstraintBase = BasicSplitConstraint
+    splitConstraint: typeof SplitConstraint = SplitConstraint
   ) {
     super();
     this._bettingPolicy = new policyType();

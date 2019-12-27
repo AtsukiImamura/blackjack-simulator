@@ -38,7 +38,7 @@ export default class CardSet {
     }
     const sum = this.highestSum;
     if (dealerPoint < sum) {
-      return this._betAmount;
+      return this._betAmount * (sum === 21 ? 1.5 : 1);
     } else if (dealerPoint > sum) {
       return -this._betAmount;
     } else {
@@ -200,9 +200,18 @@ export default class CardSet {
   }
 
   public double(card: Card): number {
-    // this._cards.push(card);
+    if (!this.canDouble) {
+      console.error(
+        "Attempted to do ilegal action DOUBLE while number of cards is more than 2."
+      );
+      return this._betAmount;
+    }
     this.add(card);
     return (this._betAmount += this._unitAmount);
+  }
+
+  public get canDouble(): boolean {
+    return this._cards.length == 2;
   }
 
   public surrender(): number {

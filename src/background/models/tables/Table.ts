@@ -1,6 +1,7 @@
 import Dealer from "../person/Dealer";
 import Player from "../person/Player";
 import Card from "../cards/Card";
+import GameSummary from "./GameSummary";
 
 export default class Table {
   public static readonly MAX_PLAYER_NUM = 6;
@@ -10,6 +11,12 @@ export default class Table {
   protected _dealer: Dealer;
 
   protected _allCards: Card[] = [];
+
+  protected _summaries: { [uid: string]: GameSummary } = {};
+
+  public get summaries(): GameSummary[] {
+    return Object.values(this._summaries);
+  }
 
   public get allCards(): Card[] {
     return this._allCards;

@@ -21,7 +21,9 @@
     "url": "https://github.com/AtsukiImamura/MunSe-ilsHomePageMaker/issues"
   },
   "homepage": "https://github.com/AtsukiImamura/MunSe-ilsHomePageMaker#readme",
-  "dependencies": {},
+  "dependencies": {
+    "canvas": "^2.6.1"
+  },
   "devDependencies": {
     "@babel/core": "^7.4.3",
     "@babel/preset-env": "^7.4.3",

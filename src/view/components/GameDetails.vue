@@ -11,19 +11,21 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from "vue-property-decorator";
+import { Component, Vue, Prop, Watch } from "vue-property-decorator";
 import GameSummary, {
   TurnSummary
 } from "../../background/models/tables/GameSummary";
 import TurnItem from "./TurnItem.vue";
-import AdminTable from "../../background/models/tables/AdminTable";
+import Table from "../../background/models/tables/Table";
 
 @Component({
   components: { TurnItem }
 })
 export default class GameDetails extends Vue {
   @Prop()
-  public table!: AdminTable;
+  public table!: Table;
+  @Prop()
+  public turnIndex?: number;
 
   public currentSummaryIndex: number = 0;
 
@@ -41,12 +43,31 @@ export default class GameDetails extends Vue {
     return this.summaries[this.currentSummaryIndex].turns;
   }
 
+  @Watch("turnIndex")
+  public onTurnIndexChanged(index: number) {
+    const turnElement = document.getElementById("turn-" + index);
+    if (!turnElement) {
+      return;
+    }
+    turnElement.scrollIntoView(true);
+  }
+
   public mounted(): void {}
 }
 </script>
 
 <style lang="scss" scoped>
 .__details {
+  // margin-top: 5px;
+  // box-shadow: 1px 1px 2px 2px rgba(80, 80, 80, 0.25);
+  border-right: 1px solid #c0c0c0;
+
   overflow-y: scroll;
+  -ms-overflow-style: none; /* IE, Edge 対応 */
+  scrollbar-width: none; /* Firefox 対応 */
+  &::-webkit-scrollbar {
+    /* Chrome, Safari 対応 */
+    display: none;
+  }
 }
 </style>

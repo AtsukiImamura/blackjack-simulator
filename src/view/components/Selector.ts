@@ -1,11 +1,19 @@
 import { Component, Vue, Prop, Emit } from "vue-property-decorator";
 
+export interface IConfigSelection {
+  id: number;
+
+  name: string;
+
+  disabled?: boolean;
+}
+
 @Component({
   components: {}
 })
 export default class Selector extends Vue {
   @Prop()
-  public options!: Map<number, string>;
+  public options!: IConfigSelection[];
 
   @Prop()
   public default?: number;
@@ -13,11 +21,19 @@ export default class Selector extends Vue {
   public selectedId: number = 0;
 
   public get selectedValue(): string {
-    const value = this.options.get(this.selectedId);
-    if (!value) {
+    const target = this.selectedOption;
+    if (!target) {
       return "";
     }
-    return value;
+    return target.name;
+  }
+
+  public get selectedOption(): IConfigSelection | undefined {
+    const targetOptions = this.options.filter(op => op.id === this.selectedId);
+    if (targetOptions.length === 0) {
+      return undefined;
+    }
+    return targetOptions[0];
   }
 
   public craeted(): void {
@@ -35,18 +51,15 @@ export default class Selector extends Vue {
   }
 
   public get values(): string[] {
-    const values: string[] = [];
-    for (const value of this.options.values()) {
-      values.push(value);
-    }
-    return values;
+    return this.options.map(op => op.name);
   }
 
   @Emit("select")
-  public select(id: number) {
-    if (!this.options.has(id)) {
+  public select(id: number): number {
+    const target = this.selectedOption;
+    if (!target) {
       throw new Error(`ID ${id} doesn't aprear in ids.`);
     }
-    this.selectedId = id;
+    return target.id;
   }
 }

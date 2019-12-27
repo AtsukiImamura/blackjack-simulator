@@ -27,7 +27,7 @@ export default class GameSummary {
 
   public addInitialCard(card: Card) {
     if (!this._currentTurn) {
-      this._currentTurn = new TurnSummary();
+      this._currentTurn = new TurnSummary(this.turns.length);
     }
     this._currentTurn.addInitialCard(card);
   }
@@ -40,9 +40,16 @@ export default class GameSummary {
     this._turns = [];
   }
 
+  public setBetAmount(amount: number) {
+    if (!this._currentTurn) {
+      return;
+    }
+    this._currentTurn.betAmount = amount;
+  }
+
   public addAction(action: Action) {
     if (!this._currentTurn) {
-      this._currentTurn = new TurnSummary();
+      this._currentTurn = new TurnSummary(this.turns.length);
     }
     this._currentTurn.addAction(action);
   }
@@ -67,6 +74,8 @@ export default class GameSummary {
 }
 
 export class TurnSummary {
+  public id: number = 0;
+
   private _dealerPoint: number = 0;
 
   private _actions: ActionSummary[] = [];
@@ -74,6 +83,8 @@ export class TurnSummary {
   private _initialCards: Card[] = [];
 
   private _diff: number = 0;
+
+  private _betAmount: number = 0;
 
   public get dealerPoint(): number {
     return this._dealerPoint;
@@ -95,6 +106,24 @@ export class TurnSummary {
       return;
     }
     this._diff = diff;
+  }
+
+  public set betAmount(amount: number) {
+    if (this._betAmount > 0) {
+      return;
+    }
+    if (amount < 0) {
+      return;
+    }
+    this._betAmount = amount;
+  }
+
+  public get betAmount(): number {
+    return this._betAmount;
+  }
+
+  constructor(id: number) {
+    this.id = id;
   }
 
   public addInitialCard(card: Card) {

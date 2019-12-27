@@ -11,12 +11,6 @@ const uuid = require("uuid");
 export default class AdminTable extends Table {
   protected _cardDispensor: BaseCardDispensor;
 
-  protected _summaries: { [uid: string]: GameSummary } = {};
-
-  public get summaries(): GameSummary[] {
-    return Object.values(this._summaries);
-  }
-
   private debug = false;
 
   /**
@@ -88,7 +82,7 @@ export default class AdminTable extends Table {
     let cnt = 0;
     for (const player of this._players) {
       player.reset();
-      player.bet();
+      const amount = player.bet();
       {
         const card = cards[cnt];
         this._summaries[player.uid].addInitialCard(card);
@@ -99,6 +93,7 @@ export default class AdminTable extends Table {
         this._summaries[player.uid].addInitialCard(card);
         player.addCard(card);
       }
+      this._summaries[player.uid].setBetAmount(amount);
       cnt++;
     }
 
