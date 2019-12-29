@@ -1,57 +1,55 @@
 import Card from "../../../models/cards/Card";
+import CountingMethodBase from "../counting/CountingMethodBase";
 
-export default class BettingPolicy {
-  protected _memorizeNum: number = 2;
+export enum GameResult {
+  WIN = 1,
 
-  protected _recentCards: Card[][] = [];
+  LOSE = -1,
 
-  protected _unitAmount: number = 1;
+  PUSH = 0
+}
+
+export default abstract class BettingPolicy {
+  protected _countingPolicy: CountingMethodBase;
+
+  protected _unitAmount: number;
+
+  protected _minBet: number;
+
+  protected _maxBet: number;
 
   protected _currentAmount: number = 1;
 
-  protected _minBet: number = 1;
+  protected _gameResult: GameResult = GameResult.PUSH;
 
-  public calcUnitPoints(points: number[]): number[] {
-    return points.map(p => p / this._unitAmount);
+  constructor(
+    countingPolicy: CountingMethodBase,
+    unitAmount: number = 1,
+    minBet: number = 1,
+    maxBet: number = 100
+  ) {
+    this._countingPolicy = countingPolicy;
+    this._unitAmount = unitAmount;
+    this._currentAmount = this._unitAmount;
+    this._minBet = minBet;
+    this._maxBet = maxBet;
   }
 
-  public memorize(cards: Card[]): void {
-    // console.log(
-    //   "BettingPolicy [memorize] this._recentCards.length = " +
-    //     this._recentCards.length
-    // );
-    if (this._recentCards.length >= this._memorizeNum) {
-      this._recentCards.shift();
-    }
-    this._recentCards.push(cards);
-    // console.log(
-    //   "         --> this._recentCards.length = " + this._recentCards.length
-    // );
+  public memorizeCard(card: Card): void {
+    this._countingPolicy.addCard(card);
   }
 
-  /**
-   * Dicedes and returns prospection of cards of next game. Positive value represents positive status and possibility of getting high card is higher than nomal status.
-   * 0 represents nomal status.
-   * Negative value represents negative status.
-   */
-  public calcStatus(): number {
-    return 0;
+  public win(): void {
+    this._gameResult = GameResult.WIN;
   }
 
-  protected calcAjustment(): number {
-    return 1;
+  public push(): void {
+    this._gameResult = GameResult.PUSH;
   }
 
-  public calcNextBet(): number {
-    let addition = 0;
-    const status = this.calcStatus();
-    if (status > 0) {
-      addition = this.calcAjustment();
-    } else if (status < 0) {
-      addition = -this.calcAjustment();
-    }
-    // this._currentAmount = this._unitAmount + addition;
-    // return this._currentAmount;
-    return Math.max(this._unitAmount + addition, this._minBet);
+  public lose(): void {
+    this._gameResult = GameResult.LOSE;
   }
+
+  public abstract calcNextBet(): number;
 }

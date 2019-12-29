@@ -6,16 +6,20 @@ import SplitConstraint from "../../options/rules/split/SplitConstraint";
 import { Action } from "../../constants/GameConstants";
 import BasicStrategy, { CardCombination } from "../../constants/BasicStrategy";
 import Card from "../cards/Card";
-import ImamBettingPolicy from "../../options/policies/betting/ImamBettingPolicy";
-// import { DebugUtils } from "../../utils/DebugUtils";
-import BasicDoubleConstraint from "../../options/rules/double/BasicDoubleConstraint";
+import DoubleConstraint from "../../options/rules/double/DoubleConstraint";
+import * as lodash from "lodash";
+import SurrenderConstraintBase from "../../options/rules/surrender/SurrenderConstraintBase";
 
 export default class Player extends Person {
   private _coinAmount: number = 0;
 
   private _bettingPolicy: BettingPolicy;
 
-  private _splitConstraint: typeof SplitConstraint;
+  private _splitConstraint: SplitConstraint;
+
+  private _doubleConstraint: DoubleConstraint;
+
+  private _surrenderConstraint: SurrenderConstraintBase;
 
   private _currentAction: Action = Action.NONE;
 
@@ -24,13 +28,16 @@ export default class Player extends Person {
   }
 
   constructor(
-    policyType: typeof BettingPolicy = ImamBettingPolicy,
-    // policyType: typeof BettingPolicy = BettingPolicy,
-    splitConstraint: typeof SplitConstraint = SplitConstraint
+    policyType: BettingPolicy,
+    splitConstraint: SplitConstraint,
+    doubleConstraint: DoubleConstraint,
+    surrenderConstraint: SurrenderConstraintBase
   ) {
     super();
-    this._bettingPolicy = new policyType();
+    this._bettingPolicy = lodash.cloneDeep(policyType);
     this._splitConstraint = splitConstraint;
+    this._doubleConstraint = doubleConstraint;
+    this._surrenderConstraint = surrenderConstraint;
   }
 
   public reset(): void {
@@ -57,11 +64,16 @@ export default class Player extends Person {
     for (const cardSet of this._cardSets) {
       this._coinAmount += cardSet.calcDiff(dealerPoint);
     }
-    this._bettingPolicy.memorize(table.allCards);
+    for (const c of table.allCards) {
+      this._bettingPolicy.memorizeCard(c);
+    }
     const diff = this._coinAmount - coinTmp;
-    if (Math.abs(diff) > 8) {
-      // console.log(`## diff = ${diff}`);
-      // console.log(DebugUtils.toJsonLines(this._cardSets));
+    if (diff > 0) {
+      this._bettingPolicy.win();
+    } else if (diff < 0) {
+      this._bettingPolicy.lose();
+    } else {
+      this._bettingPolicy.push();
     }
     return diff;
   }
@@ -74,15 +86,31 @@ export default class Player extends Person {
 
     // Initialize cardset when player bets.
     this._cardSets = [];
-    this._cardSets.push(new CardSet(betAmount));
+    this._cardSets.push(new CardSet(betAmount, this._doubleConstraint));
 
     return betAmount;
   }
 
+  public lookCard(card: Card | undefined) {
+    if (!card) {
+      return;
+    }
+    this._bettingPolicy.memorizeCard(card);
+  }
+
+  public lookCards(cards: Card[]) {
+    for (const c of cards) {
+      this.lookCard(c);
+    }
+  }
+
   public decideAction(upCard: Card): Action {
+    if (this._currentAction === Action.SURRENDER) {
+      return Action.NONE;
+    }
     if (this.currentCardSet && this.currentCardSet.isSplitted) {
-      this._currentAction = Action.HIT;
-      return Action.HIT;
+      this._currentAction = Action.NEED;
+      return Action.NEED;
     }
     if (!this.currentCardSet) {
       this._currentAction = Action.NONE;
@@ -122,6 +150,11 @@ export default class Player extends Person {
     if (action == Action.STAY || action === Action.SURRENDER) {
       this._currentCardSetIndex++;
     }
+    if (action === Action.SURRENDER) {
+      if (!this._surrenderConstraint.canSurrender(this._cardSets)) {
+        action = Action.HIT;
+      }
+    }
     this._currentAction = action;
     return action;
   }
@@ -133,6 +166,7 @@ export default class Player extends Person {
           throw new Error("Player doesn't need any card on calling STAY.");
         }
         break;
+      case Action.NEED:
       case Action.HIT:
         if (!card) {
           throw new Error("Card is required on calling HIT.");
@@ -193,6 +227,9 @@ export default class Player extends Person {
     if (!this.currentCardSet) {
       throw new Error("Current card set not found.");
     }
+    if (!card) {
+      throw new Error("Card is required after chocing hit.");
+    }
     this.currentCardSet.add(card);
   }
   public switchCardSet(): boolean {
@@ -214,16 +251,13 @@ export default class Player extends Person {
     if (!this.currentCardSet) {
       throw new Error("Current card set nout found.");
     }
-    return new this._splitConstraint().canSplit(
-      this._cardSets,
-      this.currentCardSet
-    );
+    return this._splitConstraint.canSplit(this._cardSets, this.currentCardSet);
   }
 
   private canDouble(): boolean {
     if (!this.currentCardSet) {
       throw new Error("Current card set nout found.");
     }
-    return new BasicDoubleConstraint().canDouble(this.currentCardSet);
+    return this.currentCardSet.canDouble;
   }
 }

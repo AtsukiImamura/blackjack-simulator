@@ -4,7 +4,11 @@
     <div class="detail-area">
       <div class="h"></div>
       <div class="b">
-        <TurnItem v-for="(turn, index) in turns" :key="index" :turn="turn"></TurnItem>
+        <TurnItem
+          v-for="(turn, index) in turns"
+          :key="index"
+          :turn="turn"
+        ></TurnItem>
       </div>
     </div>
   </div>
@@ -40,7 +44,9 @@ export default class GameDetails extends Vue {
       // );
       return [];
     }
-    return this.summaries[this.currentSummaryIndex].turns;
+    const turns = this.summaries[this.currentSummaryIndex].turns;
+    // console.log(turns);
+    return turns;
   }
 
   @Watch("turnIndex")
@@ -68,6 +74,9 @@ export default class GameDetails extends Vue {
   &::-webkit-scrollbar {
     /* Chrome, Safari 対応 */
     display: none;
+  }
+  .b {
+    overflow: hidden;
   }
 }
 </style>

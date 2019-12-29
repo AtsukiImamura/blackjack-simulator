@@ -15,6 +15,7 @@ export default class Table {
   protected _summaries: { [uid: string]: GameSummary } = {};
 
   public get summaries(): GameSummary[] {
+    console.log(this._summaries);
     return Object.values(this._summaries);
   }
 

@@ -8,6 +8,7 @@
         :turn-index="displayingTurnIndex"
       ></GameDetails>
       <div class="chart-area">
+        <Roading v-if="roadingOpen"></Roading>
         <Config @commit="startGame"></Config>
         <div class="chart">
           <RevenueChart
@@ -28,16 +29,17 @@ import Config from "./Config.vue";
 import Header from "./Header.vue";
 import AdminTable from "../background/models/tables/AdminTable";
 import GameDetails from "./components/GameDetails.vue";
+import Roading from "./components/Roading.vue";
 
 @Component({
-  components: { RevenueChart, Header, GameDetails, Config }
+  components: { RevenueChart, Header, GameDetails, Config, Roading }
 })
 export default class App extends Vue {
   public table: AdminTable = new AdminTable();
 
   public displayingTurnIndex: number = -1;
 
-  // public displayConfig: boolean = true;
+  public roadingOpen: boolean = false;
 
   public onSelectTurn(index: number) {
     this.displayingTurnIndex = index;
@@ -46,11 +48,15 @@ export default class App extends Vue {
   public mounted(): void {}
 
   public startGame(gameNum: number, playerNum: number) {
-    // this.displayConfig = false;
-    const table = new AdminTable();
-    table.addDefaultPlayers(playerNum);
-    table.play(gameNum);
-    this.table = table;
+    this.roadingOpen = true;
+    setTimeout(() => {
+      const table = new AdminTable();
+      table.addDefaultPlayers(playerNum);
+      table.play(gameNum).then(() => {
+        this.table = table;
+        this.roadingOpen = false;
+      });
+    }, 1200);
   }
 }
 </script>
@@ -74,6 +80,7 @@ export default class App extends Vue {
   .chart-area {
     width: 80vw;
     margin: 0 auto;
+    position: relative;
     @include sm {
       width: 100vw;
     }

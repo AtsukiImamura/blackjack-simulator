@@ -2,6 +2,10 @@
  * Trump card
  */
 export default class Card {
+  public static copy(card: Card) {
+    return new Card(card.number, card.mark);
+  }
+
   protected _number: number;
 
   protected _mark: Mark;

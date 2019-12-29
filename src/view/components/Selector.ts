@@ -5,6 +5,8 @@ export interface IConfigSelection {
 
   name: string;
 
+  onSelect: () => void;
+
   disabled?: boolean;
 }
 
@@ -56,10 +58,12 @@ export default class Selector extends Vue {
 
   @Emit("select")
   public select(id: number): number {
+    this.selectedId = id;
     const target = this.selectedOption;
     if (!target) {
       throw new Error(`ID ${id} doesn't aprear in ids.`);
     }
+    target.onSelect();
     return target.id;
   }
 }

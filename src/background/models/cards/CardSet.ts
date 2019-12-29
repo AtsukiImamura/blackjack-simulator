@@ -1,23 +1,25 @@
 import Card from "./Card";
 import BasicNumberCountRule from "../../options/rules/count/BasicNumberCountRule";
 import { CardCombination } from "../../constants/BasicStrategy";
+import DoubleConstraint from "../../options/rules/double/DoubleConstraint";
+import * as lodash from "lodash";
 
 export default class CardSet {
   private _cards: Card[] = [];
-
-  // private get cards(): Card[] {
-  //   return this._cards.filter(c => c);
-  // }
 
   private _betAmount: number;
 
   private _unitAmount: number;
 
-  // private _isSplitted
+  private _doubleConstraint: DoubleConstraint;
 
-  constructor(betAmount: number = 0) {
+  constructor(
+    betAmount: number = 0,
+    doubleConstraint: DoubleConstraint = new DoubleConstraint()
+  ) {
     this._betAmount = betAmount;
     this._unitAmount = betAmount;
+    this._doubleConstraint = doubleConstraint;
   }
 
   public doctor(): void {
@@ -37,8 +39,11 @@ export default class CardSet {
       return -this._betAmount;
     }
     const sum = this.highestSum;
+    if (this.cardNum == 2 && sum === 21) {
+      return this._betAmount * 1.5;
+    }
     if (dealerPoint < sum) {
-      return this._betAmount * (sum === 21 ? 1.5 : 1);
+      return this._betAmount;
     } else if (dealerPoint > sum) {
       return -this._betAmount;
     } else {
@@ -53,6 +58,14 @@ export default class CardSet {
   public add(card: Card): void {
     this._cards.push(card);
     // console.log("[add] ", card);
+  }
+
+  public get cardNum(): number {
+    return this._cards.length;
+  }
+
+  public get cards(): Card[] {
+    return this._cards.map(card => lodash.cloneDeep(card));
   }
 
   public get possibleSums(): number[] {
@@ -179,6 +192,10 @@ export default class CardSet {
     return this._cards.length === 1;
   }
 
+  public get isSoftHand(): boolean {
+    return this.possibleSums.length > 1;
+  }
+
   public get canSplit(): boolean {
     return (
       this._cards.length === 2 &&
@@ -194,7 +211,7 @@ export default class CardSet {
     if (this._cards.length !== 2) {
       throw new Error("Number of card set must be 2 when split.");
     }
-    const cardSet = new CardSet(this._betAmount);
+    const cardSet = new CardSet(this._betAmount, this._doubleConstraint);
     cardSet.add(this._cards.splice(0, 1)[0]);
     return cardSet;
   }
@@ -211,7 +228,7 @@ export default class CardSet {
   }
 
   public get canDouble(): boolean {
-    return this._cards.length == 2;
+    return this._doubleConstraint.canDouble(this);
   }
 
   public surrender(): number {

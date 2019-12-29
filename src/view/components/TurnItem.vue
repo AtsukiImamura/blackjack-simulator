@@ -6,17 +6,25 @@
     :turn-id="turn.id"
   >
     <div class="turn-info-list">
-      <div class="dealer turn-info">
-        <span class="key">
-          <img :src="DEALER_IMG_PATH" alt="dealer" />
-        </span>
-        <span class="value">{{ turn.dealerPoint }}</span>
+      <div
+        class="dealer turn-info"
+        @mouseenter="displayDealerCards"
+        @mouseleave="hideDealerCards"
+      >
+        <img class="delaer-icon" :src="DEALER_IMG_PATH" alt="dealer" />
+        <span class="dealer-point">{{ turn.dealerCardSet.highestSum }} </span>
+        <div class="dealder-cards" v-show="isDelearCardsOpen" ref="dealerCards">
+          <TrumpCard
+            class="c"
+            v-for="(card, index) in turn.dealerCardSet.cards"
+            :key="index"
+            :card="card"
+          ></TrumpCard>
+        </div>
       </div>
       <div class="bet-amount turn-info">
-        <span class="key">
-          <img :src="CHIPS_IMG_PATH" alt="chips" />
-        </span>
-        <span class="value">{{ turn.betAmount }}</span>
+        <img class="coin-icon" :src="CHIPS_IMG_PATH" alt="chips" />
+        <span class="amount">{{ turn.betAmount }}</span>
       </div>
       <div class="initial-cards">
         <TrumpCard
@@ -64,6 +72,8 @@ export default class TurnItem extends Vue {
   @Prop()
   public turn!: TurnSummary;
 
+  public isDelearCardsOpen: boolean = false;
+
   public get actionSummaries(): ActionSummary[] {
     return this.turn.actions;
   }
@@ -82,7 +92,16 @@ export default class TurnItem extends Vue {
     return actionLists;
   }
 
-  public mounted(): void {}
+  public displayDealerCards(e: MouseEvent) {
+    const dealerCards = this.$refs.dealerCards as HTMLDivElement;
+    dealerCards.style.top = `${e.clientY - 15}px`;
+    dealerCards.style.left = `${Math.max(40, e.clientX)}px`;
+    this.isDelearCardsOpen = true;
+  }
+
+  public hideDealerCards() {
+    this.isDelearCardsOpen = false;
+  }
 }
 </script>
 
@@ -92,6 +111,17 @@ export default class TurnItem extends Vue {
   padding: 8px 12px;
   border-bottom: 1px solid #c0c0c0;
   position: relative;
+  overflow-y: visible;
+  overflow-x: scroll;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  display: flex;
+  flex-direction: column;
+  width: auto;
+
   @include sm {
     padding: 8px 12px 8px 30px;
   }
@@ -113,7 +143,9 @@ export default class TurnItem extends Vue {
   }
   &:hover {
     &:after {
-      @include turn-id;
+      @include sm {
+        @include turn-id;
+      }
     }
   }
   @include sm {
@@ -130,16 +162,15 @@ export default class TurnItem extends Vue {
     background-color: #cce6ff;
   }
   .turn-info-list {
-    width: 100%;
+    // width: 100%;
     display: flex;
+    justify-content: flex-start;
+    overflow: visible;
     .turn-info {
       display: flex;
-      // padding: 4px;
-      width: 10%;
+      justify-content: flex-start;
       min-width: 50px;
-      // margin: 0 2%;
       .key {
-        width: 45%;
         margin: 3px 2.5%;
         img {
           width: 80%;
@@ -148,26 +179,66 @@ export default class TurnItem extends Vue {
         max-height: 25px;
       }
       .value {
-        width: 45%;
         margin: 3px 0px;
+        &.dealer-value {
+          display: flex;
+        }
+      }
+      &.dealer {
+        position: relative;
+        cursor: pointer;
+        margin-right: 8px;
+        &:hover {
+          .dealer-point {
+            color: #a0a0a0;
+          }
+        }
+        .delaer-icon {
+          width: 80%;
+          max-height: 25px;
+          max-width: 26px;
+          margin-right: 5px;
+        }
+        .dealder-cards {
+          position: fixed;
+          box-shadow: 1px 1px 2px 2px rgba(0, 0, 0, 0.25);
+          background-color: rgba(255, 255, 255, 0.8);
+          animation: to-visible 0.4s ease 0s 1 forwards;
+          overflow: visible;
+          display: flex;
+          margin: 0px 6px;
+          padding: 8px 12px;
+          z-index: 20;
+          @keyframes to-visible {
+            from {
+              width: 0px;
+            }
+            to {
+              width: auto;
+            }
+          }
+        }
+      }
+      &.bet-amount {
+        .coin-icon {
+          width: 80%;
+          max-height: 25px;
+          max-width: 26px;
+          margin-right: 5px;
+        }
       }
     }
     .initial-cards {
       display: flex;
       .c {
-        // display: block;
-        // width: 24px;
-        // text-align: center;
         margin: 0px 3px;
-        // border: 1px solid #808080;
-        // border-radius: 3px;
-        // padding: 3px 0px 0px 0px;
       }
     }
   }
   .player {
     margin-top: 6px;
     display: flex;
+    width: auto;
     .actions {
       display: block;
       border-right: 1px solid #c0c0c0;

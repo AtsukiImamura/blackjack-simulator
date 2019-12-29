@@ -22,10 +22,7 @@
       <div class="config">
         <span class="title">Card counting</span>
         <div class="drop-down">
-          <DropDownSelector
-            :options="countingOptions"
-            @select="onSelectCountingType"
-          ></DropDownSelector>
+          <DropDownSelector :options="countingOptions"></DropDownSelector>
         </div>
       </div>
       <div class="config">
@@ -38,16 +35,13 @@
         <span class="title">Allowed number of splits</span>
 
         <div class="drop-down">
-          <DropDownSelector
-            :options="splitNumberRules"
-            @select="onSelectSplitNumber"
-          ></DropDownSelector>
+          <DropDownSelector :options="splitNumberRules"></DropDownSelector>
         </div>
       </div>
       <div class="config">
-        <span class="title">Allowed number of splits with ace</span>
+        <span class="title">Resplit with ace</span>
         <div class="drop-down">
-          <DropDownSelector :options="splitRulesOnAce"></DropDownSelector>
+          <DropDownSelector :options="resplitRulesOnAce"></DropDownSelector>
         </div>
       </div>
     </div>
@@ -63,8 +57,17 @@
 import { Component, Vue, Emit, Watch } from "vue-property-decorator";
 import DropDownSelector from "./components/DropDownSelector.vue";
 import TableContext from "../background/options/TableContext";
-import BasicNumberCountRule from "../background/options/rules/count/BasicNumberCountRule";
 import { IConfigSelection } from "./components/Selector";
+import HeaulisticCounting from "../background/options/policies/counting/HeaulisticCounting";
+import NeverCounting from "../background/options/policies/counting/NeverCounting";
+import CountingMethodBase from "../background/options/policies/counting/CountingMethodBase";
+import NomalBetting from "../background/options/policies/betting/NomalBetting";
+import MartingaleMethod from "../background/options/policies/betting/MartingaleMethod";
+import ParlayMethod from "../background/options/policies/betting/ParlayMethod";
+import MiniStairsMethod from "../background/options/policies/betting/MiniStairsMethod";
+import DoubleConstraint, {
+  DoubleTiming
+} from "../background/options/rules/double/DoubleConstraint";
 
 @Component({
   components: { DropDownSelector }
@@ -76,28 +79,25 @@ export default class Config extends Vue {
 
   public isHidden: boolean = false;
 
+  public _cardCountingPolicy: CountingMethodBase = new HeaulisticCounting();
+
+  public gameNumMessages: string[] = [];
+
+  public playerNumMessages: string[] = [];
+
   public get countingOptions(): IConfigSelection[] {
     return [
       {
         id: 0,
-        name: "Heuristic"
+        name: "Heuristic",
+        onSelect: () => (this._cardCountingPolicy = new HeaulisticCounting())
       },
       {
         id: 1,
         name: "Never",
-        disabled: true
+        onSelect: () => (this._cardCountingPolicy = new NeverCounting())
       }
     ];
-  }
-
-  public onSelectCountingType(id: number) {
-    const targetOptions = this.countingOptions.filter(
-      selection => selection.id === id
-    );
-    if (targetOptions.length !== 1) {
-      throw new Error("Wooooooops!");
-    }
-    TableContext.setCountingType(new BasicNumberCountRule()); // TODO
   }
 
   public get moneySystemOptions(): IConfigSelection[] {
@@ -105,32 +105,37 @@ export default class Config extends Vue {
       {
         id: 0,
         name: "Nomal",
-        disabled: false
+        onSelect: () =>
+          TableContext.setBettingPolicy(
+            new NomalBetting(this._cardCountingPolicy)
+          )
       },
       {
         id: 1,
         name: "Martingale method",
-        disabled: true
+        onSelect: () => {
+          // console.log("Martingale method");
+          // console.log(this._cardCountingPolicy);
+          TableContext.setBettingPolicy(
+            new MartingaleMethod(this._cardCountingPolicy)
+          );
+        }
       },
       {
         id: 2,
-        name: "Varley method",
-        disabled: true
+        name: "Parlay method",
+        onSelect: () =>
+          TableContext.setBettingPolicy(
+            new ParlayMethod(this._cardCountingPolicy)
+          )
       },
       {
         id: 3,
-        name: "Cocomo method",
-        disabled: true
-      },
-      {
-        id: 4,
         name: "1-2-3 method",
-        disabled: true
-      },
-      {
-        id: 5,
-        name: "1-3-2-6 method",
-        disabled: true
+        onSelect: () =>
+          TableContext.setBettingPolicy(
+            new MiniStairsMethod(this._cardCountingPolicy)
+          )
       }
     ];
   }
@@ -140,17 +145,26 @@ export default class Config extends Vue {
       {
         id: 0,
         name: "Only when the player has 9,10 or 11",
-        disabled: true
+        onSelect: () =>
+          (TableContext.doubleConstraint = new DoubleConstraint(
+            DoubleTiming.ONLY_ON_CHANCE_HAND
+          ))
       },
       {
         id: 1,
         name: "Except for soft cards",
-        disabled: true
+        onSelect: () =>
+          (TableContext.doubleConstraint = new DoubleConstraint(
+            DoubleTiming.EXCEPT_FOR_SOFT_HAND
+          ))
       },
       {
         id: 2,
         name: "Always",
-        disabled: false
+        onSelect: () =>
+          (TableContext.doubleConstraint = new DoubleConstraint(
+            DoubleTiming.ALWAYS
+          ))
       }
     ];
   }
@@ -160,12 +174,14 @@ export default class Config extends Vue {
       {
         id: 0,
         name: "Allowed",
-        disabled: false
+        onSelect: () =>
+          (TableContext.doubleConstraint.canDoubleOnSplitted = true)
       },
       {
         id: 1,
         name: "Not allowed",
-        disabled: true
+        onSelect: () =>
+          (TableContext.doubleConstraint.canDoubleOnSplitted = false)
       }
     ];
   }
@@ -175,44 +191,34 @@ export default class Config extends Vue {
       {
         id: 0,
         name: "No limit",
-        disabled: false
+        onSelect: () => TableContext.setMaxSplitNum(Infinity)
       },
       {
         id: 1,
         name: "No more than 1 time",
-        disabled: true
+        onSelect: () => TableContext.setMaxSplitNum(1)
       },
       {
         id: 2,
         name: "No more than 2 times",
-        disabled: true
+        onSelect: () => TableContext.setMaxSplitNum(2)
       }
     ];
   }
 
-  public onSelectSplitNumber(id: number) {
-    TableContext.setMaxSplitNum(id);
-    if (id === 0) {
-      TableContext.setMaxSplitNum(Infinity);
-    }
-  }
-
-  public get splitRulesOnAce(): IConfigSelection[] {
+  public get resplitRulesOnAce(): IConfigSelection[] {
     return [
       {
         id: 0,
-        name: "No more than 2 times",
-        disabled: false
+        name: "Allowed",
+        onSelect: () =>
+          (TableContext.splitRule.canResplitAfterSplittingWithAce = true)
       },
       {
         id: 1,
-        name: "No more than 1 time",
-        disabled: true
-      },
-      {
-        id: 2,
         name: "Not allowed",
-        disabled: true
+        onSelect: () =>
+          (TableContext.splitRule.canResplitAfterSplittingWithAce = false)
       }
     ];
   }
@@ -247,11 +253,9 @@ export default class Config extends Vue {
     return num.match(/^[1-9][0-9]*$/);
   }
 
-  public gameNumMessages: string[] = [];
-
-  public playerNumMessages: string[] = [];
-
-  public mounted(): void {}
+  public mounted(): void {
+    this._cardCountingPolicy = new HeaulisticCounting();
+  }
 
   public onClickOK(): void {
     if (this.isHidden) {

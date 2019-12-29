@@ -9,5 +9,7 @@ export enum Action {
 
   SURRENDER = 4,
 
+  NEED = 5,
+
   NONE = 10
 }

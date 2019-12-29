@@ -4,8 +4,6 @@ import Card from "../../../models/cards/Card";
 export default class BasicNumberCountRule extends NumberCountRuleBase {
   public apply(cards: Card[]): number[] {
     let possiblyNumbers: number[] = [0];
-    // console.log("BasicNumberCountRule apply");
-    // console.log(cards);
     cards.forEach(card => {
       if (card.number === 1) {
         const added = possiblyNumbers.map(num => num + 10);

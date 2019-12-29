@@ -3,6 +3,7 @@ import Card from "../cards/Card";
 import { Action } from "../../constants/GameConstants";
 import { CardCombination } from "../../constants/BasicStrategy";
 import CardSet from "../cards/CardSet";
+import * as lodash from "lodash";
 
 export default class Dealer extends Person {
   private _upCard: Card | undefined;
@@ -56,5 +57,21 @@ export default class Dealer extends Person {
         return Action.STAY;
       }
     }
+  }
+
+  public checkBlackJack(): boolean {
+    if (!this.currentCardSet) {
+      return false;
+    }
+    return (
+      this.currentCardSet.cardNum == 2 && this.currentCardSet.highestSum === 21
+    );
+  }
+
+  public get cardSet(): CardSet {
+    if (!this.currentCardSet) {
+      return new CardSet();
+    }
+    return lodash.cloneDeep(this.currentCardSet);
   }
 }

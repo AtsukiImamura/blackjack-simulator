@@ -38,9 +38,6 @@ export default abstract class Person {
   }
 
   constructor() {
-    // const cardSet = new CardSet();
-    // this._cardSets.push(cardSet);
-    // this._currentCardSetIndex = 0;
     this.reset();
   }
 
