@@ -1,6 +1,6 @@
 import { Action } from "../../constants/GameConstants";
 import Card from "../cards/Card";
-import CardSet from "../cards/CardSet";
+import CardSet, { CardSetBase } from "../cards/CardSet";
 
 export default class GameSummary {
   // private _points: number[] = [0];
@@ -19,7 +19,7 @@ export default class GameSummary {
     return points;
   }
 
-  public addDealerCardSet(cardSet: CardSet) {
+  public addDealerCardSet(cardSet: CardSetBase) {
     if (!this._currentTurn) {
       throw new Error("Current Turn not found. Why?");
     }
@@ -77,7 +77,7 @@ export default class GameSummary {
 export class TurnSummary {
   public id: number = 0;
 
-  private _dealerCardSet: CardSet | undefined = undefined;
+  private _dealerCardSet: CardSetBase | undefined = undefined;
 
   private _actions: ActionSummary[] = [];
 
@@ -87,14 +87,14 @@ export class TurnSummary {
 
   private _betAmount: number = 0;
 
-  public get dealerCardSet(): CardSet {
+  public get dealerCardSet(): CardSetBase {
     if (!this._dealerCardSet) {
       return new CardSet();
     }
     return this._dealerCardSet;
   }
 
-  public set dealerCardSet(cardSet: CardSet) {
+  public set dealerCardSet(cardSet: CardSetBase) {
     if (this._dealerCardSet) {
       return;
     }

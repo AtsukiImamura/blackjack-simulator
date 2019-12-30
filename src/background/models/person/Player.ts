@@ -55,7 +55,9 @@ export default class Player extends Person {
   }
 
   /**
-   * テーブルのすべての情報をもとに次に備える
+   * Summarize result of one game and prepare for next game.
+   * Summarizing includes calculating point, judge win or lose, and memorising cards and result.
+   *
    * @param table
    */
   public summalize(table: Table): number {
@@ -78,6 +80,9 @@ export default class Player extends Person {
     return diff;
   }
 
+  /**
+   * The player bets money accorging to his/her own strategies or money systems.
+   */
   public bet(): number {
     if (!this.canBet()) {
       return 0;
@@ -91,6 +96,10 @@ export default class Player extends Person {
     return betAmount;
   }
 
+  /**
+   * Look card presented on the table.
+   * @param card
+   */
   public lookCard(card: Card | undefined) {
     if (!card) {
       return;
@@ -98,24 +107,38 @@ export default class Player extends Person {
     this._bettingPolicy.memorizeCard(card);
   }
 
+  /**
+   * Look multiple cards presented on the table.
+   * @param cards
+   */
   public lookCards(cards: Card[]) {
     for (const c of cards) {
       this.lookCard(c);
     }
   }
 
+  /**
+   * Decide action based on dealer's up card and own cards.
+   * After calling this method, caller must also call commitAction() to complete action player decided in this method.
+   *
+   * @param upCard
+   */
   public decideAction(upCard: Card): Action {
+    // after surrender
     if (this._currentAction === Action.SURRENDER) {
       return Action.NONE;
     }
+    // after split
     if (this.currentCardSet && this.currentCardSet.isSplitted) {
       this._currentAction = Action.NEED;
       return Action.NEED;
     }
+    // no more card set
     if (!this.currentCardSet) {
       this._currentAction = Action.NONE;
       return Action.NONE;
     }
+    // after burst and double
     if (
       this.currentCardSet.isBursted ||
       this._currentAction === Action.DOUBLE
@@ -138,33 +161,42 @@ export default class Player extends Person {
     let action = strategies[upCard.number > 10 ? 10 : upCard.number];
     if (action === Action.SPLIT && !this.canSplit()) {
       // TODO: スプリットできない場合にハードに読み替えて戦略を算出
-      action = Action.STAY;
       if (this.currentCardSet && this.currentCardSet.lowestSum < 12) {
         action = Action.HIT;
+      } else {
+        action = Action.STAY;
       }
     }
 
     if (action === Action.DOUBLE && !this.canDouble()) {
       action = Action.HIT;
     }
-    if (action == Action.STAY || action === Action.SURRENDER) {
-      this._currentCardSetIndex++;
-    }
-    if (action === Action.SURRENDER) {
-      if (!this._surrenderConstraint.canSurrender(this._cardSets)) {
-        action = Action.HIT;
-      }
+
+    // player will handle next card set next time.
+    // if (action == Action.STAY) {
+    //   this._currentCardSetIndex++;
+    // }
+    if (
+      action === Action.SURRENDER &&
+      !this._surrenderConstraint.canSurrender(this._cardSets)
+    ) {
+      action = Action.HIT;
     }
     this._currentAction = action;
     return action;
   }
 
+  /**
+   * Complete action decided by player. When a card is needed according to action, a card is required but it must not be presented the action does not need any card.
+   * @param card
+   */
   public commitAction(card: Card | undefined = undefined) {
     switch (this._currentAction) {
       case Action.STAY:
         if (card) {
           throw new Error("Player doesn't need any card on calling STAY.");
         }
+        this._currentCardSetIndex++;
         break;
       case Action.NEED:
       case Action.HIT:
@@ -198,13 +230,21 @@ export default class Player extends Person {
     }
   }
 
+  /**
+   * Surrender
+   */
   private attemptToSurrender() {
     if (!this.currentCardSet) {
       throw new Error("Current card set not found.");
     }
     this.currentCardSet.surrender();
+    this._currentCardSetIndex++;
   }
 
+  /**
+   * Split
+   * TODO: check condition here as well.
+   */
   private attemptToSplit() {
     if (!this.currentCardSet) {
       throw new Error("Current card set not found.");
@@ -216,6 +256,10 @@ export default class Player extends Person {
     this._cardSets.push(newCardSet);
   }
 
+  /**
+   * Double
+   * @param card
+   */
   private attemptToDouble(card: Card) {
     if (!this.currentCardSet) {
       throw new Error("Current card set not found.");
@@ -223,6 +267,10 @@ export default class Player extends Person {
     this.currentCardSet.double(card);
   }
 
+  /**
+   * Hit
+   * @param card
+   */
   private attmptToHit(card: Card) {
     if (!this.currentCardSet) {
       throw new Error("Current card set not found.");
@@ -232,6 +280,11 @@ export default class Player extends Person {
     }
     this.currentCardSet.add(card);
   }
+
+  /**
+   * Change handling card set to next one.
+   * Notice that the handling card may be undefined.
+   */
   public switchCardSet(): boolean {
     if (this._currentCardSetIndex >= this._cardSets.length) {
       return false;
@@ -240,6 +293,9 @@ export default class Player extends Person {
     return true;
   }
 
+  /**
+   * Returns if the player is waiting for bet.
+   */
   private canBet(): boolean {
     if (!this.currentCardSet) {
       return true;
@@ -247,6 +303,9 @@ export default class Player extends Person {
     return this._cardSets.length === 1 && this.currentCardSet.canBet();
   }
 
+  /**
+   * Returns if the player's card set can be splitted according to split constraints.
+   */
   private canSplit(): boolean {
     if (!this.currentCardSet) {
       throw new Error("Current card set nout found.");
@@ -254,6 +313,9 @@ export default class Player extends Person {
     return this._splitConstraint.canSplit(this._cardSets, this.currentCardSet);
   }
 
+  /**
+   * Returns if the player's card set can be doubled according to double constraints.
+   */
   private canDouble(): boolean {
     if (!this.currentCardSet) {
       throw new Error("Current card set nout found.");

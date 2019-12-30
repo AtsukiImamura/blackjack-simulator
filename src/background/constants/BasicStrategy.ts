@@ -153,7 +153,7 @@ BasicStrategy.set(CardCombination.H15, {
   7: Action.HIT,
   8: Action.HIT,
   9: Action.HIT,
-  10: Action.HIT,
+  10: Action.SURRENDER,
   1: Action.HIT
 });
 BasicStrategy.set(CardCombination.H16, {
@@ -164,9 +164,9 @@ BasicStrategy.set(CardCombination.H16, {
   6: Action.STAY,
   7: Action.HIT,
   8: Action.HIT,
-  9: Action.HIT,
-  10: Action.HIT,
-  1: Action.HIT
+  9: Action.SURRENDER,
+  10: Action.SURRENDER,
+  1: Action.SURRENDER
 });
 BasicStrategy.set(CardCombination.HIGH, {
   2: Action.STAY,

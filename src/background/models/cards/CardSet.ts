@@ -2,16 +2,17 @@ import Card from "./Card";
 import BasicNumberCountRule from "../../options/rules/count/BasicNumberCountRule";
 import { CardCombination } from "../../constants/BasicStrategy";
 import DoubleConstraint from "../../options/rules/double/DoubleConstraint";
-import * as lodash from "lodash";
 
-export default class CardSet {
-  private _cards: Card[] = [];
+export class CardSetBase {
+  protected _cards: Card[] = [];
 
-  private _betAmount: number;
+  protected _betAmount: number;
 
-  private _unitAmount: number;
+  protected _unitAmount: number;
 
-  private _doubleConstraint: DoubleConstraint;
+  protected _doubleConstraint: DoubleConstraint;
+
+  protected _isSurrenderd: boolean = false;
 
   constructor(
     betAmount: number = 0,
@@ -22,54 +23,15 @@ export default class CardSet {
     this._doubleConstraint = doubleConstraint;
   }
 
-  public doctor(): void {
-    const errors: string[] = [];
-    if (this._cards.length < 2) {
-      errors.push("ERROR :  length of cards is " + this._cards.length);
-    }
-
-    if (errors.length > 0) {
-      console.log(this);
-      errors.forEach(e => console.log(e));
-    }
-  }
-
-  public calcDiff(dealerPoint: number): number {
-    if (this.isBursted) {
-      return -this._betAmount;
-    }
-    const sum = this.highestSum;
-    if (this.cardNum == 2 && sum === 21) {
-      return this._betAmount * 1.5;
-    }
-    if (dealerPoint < sum) {
-      return this._betAmount;
-    } else if (dealerPoint > sum) {
-      return -this._betAmount;
-    } else {
-      return 0;
-    }
-  }
-
-  public canBet(): boolean {
-    return this._betAmount === 0;
-  }
-
-  public add(card: Card): void {
-    this._cards.push(card);
-    // console.log("[add] ", card);
-  }
-
   public get cardNum(): number {
     return this._cards.length;
   }
 
   public get cards(): Card[] {
-    return this._cards.map(card => lodash.cloneDeep(card));
+    return this._cards.slice(0);
   }
 
   public get possibleSums(): number[] {
-    // console.log("CardSet#possibleSums()");
     return new BasicNumberCountRule().apply(this._cards).sort((a, b) => a - b);
   }
 
@@ -81,9 +43,7 @@ export default class CardSet {
   }
 
   public get lowestSum(): number {
-    // console.log("this._cards = ", this._cards);
     const possibleSums = this.possibleSums;
-    // console.log("[lowerSum] possibleSums = ", possibleSums);
     return possibleSums.length === 0 ? 0 : possibleSums[0];
   }
 
@@ -203,8 +163,54 @@ export default class CardSet {
     );
   }
 
+  public canBet(): boolean {
+    return this._betAmount === 0;
+  }
+
   public get doubleNum(): number {
     return Math.floor(this._betAmount / this._unitAmount);
+  }
+}
+
+export default class CardSet extends CardSetBase {
+  public doctor(): void {
+    const errors: string[] = [];
+    if (this._cards.length < 2) {
+      errors.push("ERROR :  length of cards is " + this._cards.length);
+    }
+
+    if (errors.length > 0) {
+      console.log(this);
+      errors.forEach(e => console.log(e));
+    }
+  }
+
+  public asBase(): CardSetBase {
+    return this as CardSetBase;
+  }
+
+  public calcDiff(dealerPoint: number): number {
+    if (this.isBursted) {
+      return -this._betAmount;
+    }
+    if (this._isSurrenderd) {
+      return -this._betAmount * 0.5;
+    }
+    const sum = this.highestSum;
+    if (this.cardNum == 2 && sum === 21) {
+      return this._betAmount * 1.5;
+    }
+    if (dealerPoint < sum) {
+      return this._betAmount;
+    } else if (dealerPoint > sum) {
+      return -this._betAmount;
+    } else {
+      return 0;
+    }
+  }
+
+  public add(card: Card): void {
+    this._cards.push(card);
   }
 
   public split(): CardSet {
@@ -232,7 +238,7 @@ export default class CardSet {
   }
 
   public surrender(): number {
-    // TODO: do something in need.
+    this._isSurrenderd = true;
     return this._betAmount * 0.5;
   }
 }

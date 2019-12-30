@@ -2,8 +2,7 @@ import Person from "./Person";
 import Card from "../cards/Card";
 import { Action } from "../../constants/GameConstants";
 import { CardCombination } from "../../constants/BasicStrategy";
-import CardSet from "../cards/CardSet";
-import * as lodash from "lodash";
+import CardSet, { CardSetBase } from "../cards/CardSet";
 
 export default class Dealer extends Person {
   private _upCard: Card | undefined;
@@ -68,10 +67,10 @@ export default class Dealer extends Person {
     );
   }
 
-  public get cardSet(): CardSet {
+  public get cardSet(): CardSetBase {
     if (!this.currentCardSet) {
-      return new CardSet();
+      return new CardSet().asBase();
     }
-    return lodash.cloneDeep(this.currentCardSet);
+    return this.currentCardSet.asBase();
   }
 }

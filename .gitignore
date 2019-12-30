@@ -8,3 +8,6 @@ index.js
 dist/public/*
 !index.html
 res.txt
+
+.VSCodeCounter/
+.firebase/
