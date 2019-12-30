@@ -4,14 +4,15 @@ import { CardCombination } from "../../constants/BasicStrategy";
 import DoubleConstraint from "../../options/rules/double/DoubleConstraint";
 
 export class CardSetBase {
+  /** Handling cards */
   protected _cards: Card[] = [];
-
+  /** Current bet amount which can be risen by doubling. */
   protected _betAmount: number;
-
+  /** Bet amount which is set by the player. */
   protected _unitAmount: number;
-
+  /** Double rule */
   protected _doubleConstraint: DoubleConstraint;
-
+  /** Flag for handling if this card set is already surrendered. */
   protected _isSurrenderd: boolean = false;
 
   constructor(
@@ -23,10 +24,16 @@ export class CardSetBase {
     this._doubleConstraint = doubleConstraint;
   }
 
+  /**
+   * Returns number of the cards.
+   */
   public get cardNum(): number {
     return this._cards.length;
   }
 
+  /**
+   * Return all of the cards.
+   */
   public get cards(): Card[] {
     return this._cards.slice(0);
   }
@@ -35,6 +42,9 @@ export class CardSetBase {
     return new BasicNumberCountRule().apply(this._cards).sort((a, b) => a - b);
   }
 
+  /**
+   * Returns highest evaluated sum of the cards
+   */
   public get highestSum(): number {
     const possibleSums = this.possibleSums;
     return possibleSums.length === 0
@@ -42,11 +52,17 @@ export class CardSetBase {
       : possibleSums[possibleSums.length - 1];
   }
 
+  /**
+   * Returns lowest evaluated sum of the cards
+   */
   public get lowestSum(): number {
     const possibleSums = this.possibleSums;
     return possibleSums.length === 0 ? 0 : possibleSums[0];
   }
 
+  /**
+   * Evaluates the cards, and returns in which situation the cards are.
+   */
   public get cardCombnation(): CardCombination {
     if (this._cards.length < 2) {
       throw new Error(
@@ -138,20 +154,32 @@ export class CardSetBase {
     throw new Error("Satisfied conbination name not found.  point = " + point);
   }
 
+  /**
+   * Retruns if at least one ace card is in the cards or not.
+   */
   private get hasAce(): boolean {
     return (
       this._cards.map(card => card.number).filter(num => num === 1).length > 0
     );
   }
 
+  /**
+   * Retruns if this card set is already bursted or not.
+   */
   public get isBursted(): boolean {
     return this._cards.length > 0 && this.possibleSums.length === 0;
   }
 
+  /**
+   * Retruns if this card set is already splitted or not.
+   */
   public get isSplitted(): boolean {
     return this._cards.length === 1;
   }
 
+  /**
+   * Returns if the card combination is soft hand or not.
+   */
   public get isSoftHand(): boolean {
     return this.possibleSums.length > 1;
   }
@@ -163,10 +191,16 @@ export class CardSetBase {
     );
   }
 
+  /**
+   * Returns if betting is allowed or not.
+   */
   public canBet(): boolean {
     return this._betAmount === 0;
   }
 
+  /**
+   * Returns number of 'doubled'.
+   */
   public get doubleNum(): number {
     return Math.floor(this._betAmount / this._unitAmount);
   }
@@ -189,6 +223,10 @@ export default class CardSet extends CardSetBase {
     return this as CardSetBase;
   }
 
+  /**
+   * Evaluate game result and calculate gained or lost amount.
+   * @param dealerPoint
+   */
   public calcDiff(dealerPoint: number): number {
     if (this.isBursted) {
       return -this._betAmount;

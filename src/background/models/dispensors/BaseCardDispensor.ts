@@ -17,6 +17,9 @@ export default abstract class BaseCardDispensor {
    */
   public abstract next(): Card | undefined;
 
+  /**
+   * Refill cards which are picked up from itself.
+   */
   public abstract refill(): void;
 
   /**

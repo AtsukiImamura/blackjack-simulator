@@ -42,8 +42,6 @@ export default class SnailsCardDispensor extends BaseCardDispensor {
         holderCards = [];
       }
     }
-
-    // console.log("[init] this._holder.length = " + this._holders.length);
   }
 
   public next(): Card | undefined {
@@ -74,23 +72,11 @@ export default class SnailsCardDispensor extends BaseCardDispensor {
    * 引かれたカードを詰めなおす
    */
   public refill(): void {
-    // console.log(
-    //   "[refill] this._pickedCards.length = " +
-    //     this._pickedCards.length +
-    //     "   this._holders.length = " +
-    //     this._holders.length
-    // );
     while (this._pickedCards.length >= CardHolder.HOLD_NUM) {
       this._holders.push(
         new CardHolder(this._pickedCards.splice(0, CardHolder.HOLD_NUM))
       );
     }
-    // console.log(
-    //   "    -->  this._pickedCards.length = " +
-    //     this._pickedCards.length +
-    //     "   this._holders.length = " +
-    //     this._holders.length
-    // );
   }
 }
 
