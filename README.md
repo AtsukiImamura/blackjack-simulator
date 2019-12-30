@@ -3,39 +3,37 @@
 This application aims to make everyone able to simulate Black Jack game easily.
 Knowing how the game goes on must help you improve your stragtegy!
 
-# 構成
+# Abstract
 
-- ユーザーの設定のもとで BS に従ったプレーを行い、その結果をグラフで表示します
-- どのようなカードが出てどの対応をしたのが、履歴がすべて表示されます
+- Simulate black jack games based on user configulation and basic strategy, then display the results as graph
+- All of the game records which include which trump cards were picked up and how the players made disitions will be presented on the display.
 
-# 特徴
+# Features
 
-## 現実のゲーム忠実に再現したシミュレーション
+## Real simulation of black jack
+- User can change the way how the card dispensor works.
 
-- トランプの配給方式: カタツムリ方式・シュー方式
-- デッキ数: 可変（対応中）
+## Rules can be changed flexibly.
 
-## ルールのバリエーションに対応
+- Local rules such as Split rules (number of split, etc) and double rules (Prohibition of doubling after splitting with ace, etc) can be adopted.
 
-- スプリットのルール（2 回まで、3 回まで、など）、ダブルのルール（エースでのスプリット後は禁止、など）といったローカルのルールに対応
+## Dividend rate can be changed flexibly.
 
-## 配当率のバリエーションに対応
+- `Outrageous` 6 to 5 dividend rate with black jack which is resently seen at Las Vegas can be adopted. (DRAFT)
 
-- 最近ラスベガスで増えているという 6to5 の `けしからん` ブラックジャック配当も選択可能（対応中）
-
-## マネーシステムに対応
-
-- 有名どころのマネーシステムを再現
-  - ココモ法
-  - 1-2-3 法
-  - マーチンゲール法
+## User can choce money system
+- Famous money systems are available.
+  - Cocomo method
+  - Mini stairs method (1-2-3 method)
+  - Martingale method
   - etc...
 
-## カードカウンティングをシミュレーション
+## Simulating card counting
 
-- どこまで厳密なカウンティングをすればよいかが分かります
-  - ヒューリスティック（デフォルト）: いっぱい絵札出てるなー程度のカウンティング
-  - 一般的なカウンティング: 2-7 に+1, 10-13,1 に-1 の値を割り振るアレ
+- User can understand which counting method they should apply.
+  - Heaulistic (default): By memorizing how many face card are on the table.
+  - Basic counting method: The one that each card has own value, +1 for 2 to 7 and -1 for face cards and ace.
+  
 
 # screen shots
 
